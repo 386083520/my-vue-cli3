@@ -1,3 +1,4 @@
+const { clearConsole } = require('./util/clearConsole')
 module.exports = class Creator {
     constructor (name, context, promptModules) {
         this.name = name
@@ -17,7 +18,8 @@ module.exports = class Creator {
     }
     promptAndResolvePreset (answers = null) {
         if (!answers) {
-
+            clearConsole(true)
+            // answers = inquirer.prompt(this.resolveFinalPrompts())
         }
     }
 }
