@@ -3,6 +3,21 @@ module.exports = class Creator {
         this.name = name
     }
     create (cliOptions = {}, preset = null) {
-        console.log('class create')
+        if (!preset) {
+            if (cliOptions.preset) {
+
+            } else if (cliOptions.default) {
+
+            } else if (cliOptions.inlinePreset) {
+
+            } else {
+                preset = this.promptAndResolvePreset()
+            }
+        }
+    }
+    promptAndResolvePreset (answers = null) {
+        if (!answers) {
+
+        }
     }
 }
