@@ -10,5 +10,8 @@
     "myvue3": "bin/vue.js"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^2.20.0"
+  }
 }
