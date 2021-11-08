@@ -19,6 +19,7 @@ module.exports = class Creator {
         this.featurePrompt = featurePrompt
         this.outroPrompts = this.resolveOutroPrompts()
         this.injectedPrompts = []
+        this.promptCompleteCbs = []
         const promptAPI = new PromptModuleAPI(this)
         promptModules.forEach(m => m(promptAPI))
     }
@@ -47,7 +48,12 @@ module.exports = class Creator {
         if (answers.preset && answers.preset !== '__manual__') {
             preset = this.resolvePreset(answers.preset)
         }else {
-
+            preset = {
+                useConfigFiles: answers.useConfigFiles === 'files',
+                plugins: {}
+            }
+            answers.features = answers.features || []
+            this.promptCompleteCbs.forEach(cb => cb(answers, preset))
         }
         validatePreset(preset)
         return preset
