@@ -33,12 +33,12 @@ module.exports = class Creator {
             }
         }
     }
-    promptAndResolvePreset (answers = null) {
+    async promptAndResolvePreset (answers = null) {
         if (!answers) {
             clearConsole(true)
-            answers = inquirer.prompt(this.resolveFinalPrompts())
+            answers = await inquirer.prompt(this.resolveFinalPrompts())
         }
-        // console.log('gsdanswers', answers)
+        console.log('gsdanswers', answers)
     }
     resolveFinalPrompts () {
         const prompts = [
