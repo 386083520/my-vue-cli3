@@ -4,6 +4,10 @@ const { formatFeatures } = require('./util/features')
 const { clearConsole } = require('./util/clearConsole')
 const PromptModuleAPI = require('./PromptModuleAPI')
 const {
+    hasYarn,
+    hasPnpm3OrLater
+} = require('@vue/cli-shared-utils')
+const {
     defaults,
     loadOptions,
     validatePreset,
@@ -122,6 +126,35 @@ module.exports = class Creator {
             type: 'input',
             message: 'Save preset as:'
         }]
+        const savedOptions = loadOptions()
+        if (!savedOptions.packageManager && (hasYarn() || hasPnpm3OrLater())) {
+            const packageManagerChoices = []
+            if (hasYarn()) {
+                packageManagerChoices.push({
+                    name: 'Use Yarn',
+                    value: 'yarn',
+                    short: 'Yarn'
+                })
+            }
+            if (hasPnpm3OrLater()) {
+                packageManagerChoices.push({
+                    name: 'Use PNPM',
+                    value: 'pnpm',
+                    short: 'PNPM'
+                })
+            }
+            packageManagerChoices.push({
+                name: 'Use NPM',
+                value: 'npm',
+                short: 'NPM'
+            })
+            outroPrompts.push({
+                name: 'packageManager',
+                type: 'list',
+                message: 'Pick the package manager to use when installing dependencies:',
+                choices: packageManagerChoices
+            })
+        }
         return outroPrompts
     }
     resolvePreset (name, clone) {
