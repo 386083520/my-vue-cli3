@@ -126,6 +126,10 @@ module.exports = class Creator {
     }
     resolvePreset (name, clone) {
         let preset
+        const savedPresets = loadOptions().presets || {}
+        if (name in savedPresets) {
+            preset = savedPresets[name]
+        }
         if (name === 'default' && !preset) {
             preset = defaults.presets.default
         }

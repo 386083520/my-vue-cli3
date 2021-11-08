@@ -18,12 +18,37 @@ const presetSchema = createSchema(joi => joi.object().keys({
     configs: joi.object()
 }))
 
+const schema = createSchema(joi => joi.object().keys({
+    latestVersion: joi.string().regex(/^\d+\.\d+\.\d+$/),
+    lastChecked: joi.date().timestamp(),
+    packageManager: joi.string().only(['yarn', 'npm', 'pnpm']),
+    useTaobaoRegistry: joi.boolean(),
+    presets: joi.object().pattern(/^/, presetSchema)
+}))
+
 exports.loadOptions = () => {
     if (cachedOptions) {
         return cachedOptions
     }
     if (fs.existsSync(rcPath)) {
-        return {}
+        try {
+            cachedOptions = JSON.parse(fs.readFileSync(rcPath, 'utf-8'))
+        } catch (e) {
+            error(
+                `Error loading saved preferences: ` +
+                `~/.vuerc may be corrupted or have syntax errors. ` +
+                `Please fix/delete it and re-run vue-cli in manual mode.\n` +
+                `(${e.message})`,
+            )
+            exit(1)
+        }
+        validate(cachedOptions, schema, () => {
+            error(
+                `~/.vuerc may be outdated. ` +
+                `Please delete it and re-run vue-cli in manual mode.`
+            )
+        })
+        return cachedOptions
     } else {
         return {}
     }
