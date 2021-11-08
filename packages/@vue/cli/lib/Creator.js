@@ -1,10 +1,12 @@
 const inquirer = require('inquirer')
+const cloneDeep = require('lodash.clonedeep')
 const { formatFeatures } = require('./util/features')
 const { clearConsole } = require('./util/clearConsole')
 const PromptModuleAPI = require('./PromptModuleAPI')
 const {
     defaults,
-    loadOptions
+    loadOptions,
+    validatePreset
 } = require('./options')
 
 const isManualMode = answers => answers.preset === '__manual__'
@@ -20,7 +22,7 @@ module.exports = class Creator {
         const promptAPI = new PromptModuleAPI(this)
         promptModules.forEach(m => m(promptAPI))
     }
-    create (cliOptions = {}, preset = null) {
+    async create (cliOptions = {}, preset = null) {
         if (!preset) {
             if (cliOptions.preset) {
 
@@ -29,9 +31,11 @@ module.exports = class Creator {
             } else if (cliOptions.inlinePreset) {
 
             } else {
-                preset = this.promptAndResolvePreset()
+                preset = await this.promptAndResolvePreset()
             }
         }
+        preset = cloneDeep(preset)
+        console.log('gsdpreset', preset)
     }
     async promptAndResolvePreset (answers = null) {
         if (!answers) {
@@ -39,6 +43,14 @@ module.exports = class Creator {
             answers = await inquirer.prompt(this.resolveFinalPrompts())
         }
         console.log('gsdanswers', answers)
+        let preset
+        if (answers.preset && answers.preset !== '__manual__') {
+            preset = this.resolvePreset(answers.preset)
+        }else {
+
+        }
+        validatePreset(preset)
+        return preset
     }
     resolveFinalPrompts () {
         const prompts = [
@@ -88,5 +100,12 @@ module.exports = class Creator {
     }
     resolveOutroPrompts () {
         return []
+    }
+    resolvePreset (name, clone) {
+        let preset
+        if (name === 'default' && !preset) {
+            preset = defaults.presets.default
+        }
+        return preset
     }
 }
