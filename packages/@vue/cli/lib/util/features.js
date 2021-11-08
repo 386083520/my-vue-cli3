@@ -17,7 +17,6 @@ exports.getFeatures = (preset) => {
 }
 exports.formatFeatures = (preset, lead, joiner) => {
     const features = exports.getFeatures(preset)
-    console.log('gsdfeatures', features)
     return features.map(dep => {
         dep = toShortPluginId(dep)
         return `${lead || ''}${chalk.yellow(dep)}`

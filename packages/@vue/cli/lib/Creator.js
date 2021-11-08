@@ -1,6 +1,7 @@
 const inquirer = require('inquirer')
 const { formatFeatures } = require('./util/features')
 const { clearConsole } = require('./util/clearConsole')
+const PromptModuleAPI = require('./PromptModuleAPI')
 const {
     defaults,
     loadOptions
@@ -16,6 +17,8 @@ module.exports = class Creator {
         this.featurePrompt = featurePrompt
         this.outroPrompts = this.resolveOutroPrompts()
         this.injectedPrompts = []
+        const promptAPI = new PromptModuleAPI(this)
+        promptModules.forEach(m => m(promptAPI))
     }
     create (cliOptions = {}, preset = null) {
         if (!preset) {

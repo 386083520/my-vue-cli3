@@ -1,3 +1,6 @@
 exports.getPromptModules = () => {
-    return []
+    return [
+        'vuex',
+        'router'
+    ].map(file => require(`../promptModules/${file}`))
 }
