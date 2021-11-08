@@ -6,7 +6,8 @@ const PromptModuleAPI = require('./PromptModuleAPI')
 const {
     defaults,
     loadOptions,
-    validatePreset
+    validatePreset,
+    savePreset
 } = require('./options')
 
 const isManualMode = answers => answers.preset === '__manual__'
@@ -56,6 +57,9 @@ module.exports = class Creator {
             this.promptCompleteCbs.forEach(cb => cb(answers, preset))
         }
         validatePreset(preset)
+        if (answers.save && answers.saveName) {
+            savePreset(answers.saveName, preset)
+        }
         return preset
     }
     resolveFinalPrompts () {
@@ -105,7 +109,20 @@ module.exports = class Creator {
         }
     }
     resolveOutroPrompts () {
-        return []
+        const outroPrompts = [{
+            name: 'save',
+            when: isManualMode,
+            type: 'confirm',
+            message: 'Save this as a preset for future projects?',
+            default: false
+        },
+        {
+            name: 'saveName',
+            when: answers => answers.save,
+            type: 'input',
+            message: 'Save preset as:'
+        }]
+        return outroPrompts
     }
     resolvePreset (name, clone) {
         let preset
