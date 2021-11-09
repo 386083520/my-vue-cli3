@@ -9,6 +9,7 @@ const writeFileTree = require('./util/writeFileTree')
 const { installDeps } = require('./util/installDeps')
 const PromptModuleAPI = require('./PromptModuleAPI')
 const sortObject = require('./util/sortObject')
+const Generator = require('./Generator')
 const {
     log,
     hasYarn,
@@ -40,7 +41,7 @@ module.exports = class Creator {
         promptModules.forEach(m => m(promptAPI))
     }
     async create (cliOptions = {}, preset = null) {
-        const { name, context } = this
+        const { name, context, createCompleteCbs } = this
         if (!preset) {
             if (cliOptions.preset) {
 
@@ -90,6 +91,14 @@ module.exports = class Creator {
         log(`🚀  Invoking generators...`)
         const plugins = this.resolvePlugins(preset.plugins)
         console.log('gsdplugins', plugins)
+        const generator = new Generator(context, {
+            pkg,
+            plugins,
+            completeCbs: createCompleteCbs
+        })
+        generator.generate({
+            extractConfigFiles: preset.useConfigFiles || true
+        })
     }
     resolvePlugins (rawPlugins) {
         rawPlugins = sortObject(rawPlugins, ['@vue/cli-service'], false)
