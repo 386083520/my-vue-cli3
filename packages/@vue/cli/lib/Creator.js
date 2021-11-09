@@ -5,10 +5,14 @@ const semver = require('semver')
 const { formatFeatures } = require('./util/features')
 const { clearConsole } = require('./util/clearConsole')
 const getVersions = require('./util/getVersions')
+const writeFileTree = require('./util/writeFileTree')
+const { installDeps } = require('./util/installDeps')
 const PromptModuleAPI = require('./PromptModuleAPI')
 const {
+    log,
     hasYarn,
     logWithSpinner,
+    stopSpinner,
     hasPnpm3OrLater
 } = require('@vue/cli-shared-utils')
 const {
@@ -63,7 +67,24 @@ module.exports = class Creator {
             devDependencies: {}
         }
         const deps = Object.keys(preset.plugins)
+        deps.forEach(dep => {
+            pkg.devDependencies[dep] = (
+                preset.plugins[dep].version ||
+                ((/^@vue/.test(dep)) ? `^${currentMinor}` : `latest`)
+            )
+        })
+        console.log('gsdpkg', pkg)
+        writeFileTree(context, {
+            'package.json': JSON.stringify(pkg, null, 2)
+        })
+        stopSpinner()
+        log(`⚙  Installing CLI plugins. This might take a while...`)
+        log()
+        if (false) {
 
+        }else {
+            installDeps(context, packageManager, cliOptions.registry)
+        }
     }
     async promptAndResolvePreset (answers = null) {
         if (!answers) {
