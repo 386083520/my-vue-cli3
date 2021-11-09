@@ -1,10 +1,14 @@
 const inquirer = require('inquirer')
 const cloneDeep = require('lodash.clonedeep')
+const chalk = require('chalk')
+const semver = require('semver')
 const { formatFeatures } = require('./util/features')
 const { clearConsole } = require('./util/clearConsole')
+const getVersions = require('./util/getVersions')
 const PromptModuleAPI = require('./PromptModuleAPI')
 const {
     hasYarn,
+    logWithSpinner,
     hasPnpm3OrLater
 } = require('@vue/cli-shared-utils')
 const {
@@ -19,6 +23,7 @@ const isManualMode = answers => answers.preset === '__manual__'
 module.exports = class Creator {
     constructor (name, context, promptModules) {
         this.name = name
+        this.context = context
         const { presetPrompt, featurePrompt } = this.resolveIntroPrompts()
         this.presetPrompt = presetPrompt
         this.featurePrompt = featurePrompt
@@ -29,6 +34,7 @@ module.exports = class Creator {
         promptModules.forEach(m => m(promptAPI))
     }
     async create (cliOptions = {}, preset = null) {
+        const { name, context } = this
         if (!preset) {
             if (cliOptions.preset) {
 
@@ -41,7 +47,23 @@ module.exports = class Creator {
             }
         }
         preset = cloneDeep(preset)
+        preset.plugins['@vue/cli-service'] = Object.assign({
+            projectName: name
+        }, preset)
         console.log('gsdpreset', preset)
+        const packageManager = 'npm'
+        clearConsole()
+        logWithSpinner(`✨`, `Creating project in ${chalk.yellow(context)}.`)
+        const { current } = getVersions()
+        const currentMinor = `${semver.major(current)}.${semver.minor(current)}.0`
+        const pkg = {
+            name,
+            version: '0.1.0',
+            private: true,
+            devDependencies: {}
+        }
+        const deps = Object.keys(preset.plugins)
+
     }
     async promptAndResolvePreset (answers = null) {
         if (!answers) {
