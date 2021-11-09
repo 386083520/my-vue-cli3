@@ -1,3 +1,4 @@
+const execa = require('execa')
 const shouldUseTaobao = require('./shouldUseTaobao')
 const registries = require('./registries')
 
@@ -32,13 +33,38 @@ function addRegistryToArgs (command, args, cliRegistry) {
 }
 
 function executeCommand (command, args, targetDir) {
+    return new Promise((resolve, reject) => {
+        const apiMode = process.env.VUE_CLI_API_MODE
+        if (apiMode) {
 
+        }
+        console.log('gsdexecuteCommand', command, args, targetDir)
+        const child = execa(command, args, {
+            cwd: targetDir,
+            stdio: ['inherit', apiMode ? 'pipe' : 'inherit', !apiMode && command === 'yarn' ? 'pipe' : 'inherit']
+        })
+        if (apiMode) {
+
+        } else {
+            console.log('gsdhere')
+            if (command === 'yarn') {
+
+            }
+            child.on('close', code => {
+                if (code !== 0) {
+                    reject(`command failed: ${command} ${args.join(' ')}`)
+                    return
+                }
+                resolve()
+            })
+        }
+    })
 }
 
 
-exports.installDeps = function installDeps (targetDir, command, cliRegistry) {
+exports.installDeps = async function installDeps (targetDir, command, cliRegistry) {
     checkPackageManagerIsSupported(command)
     const args = packageManagerConfig[command].installDeps
     addRegistryToArgs(command, args, cliRegistry)
-    executeCommand(command, args, targetDir)
+    await executeCommand(command, args, targetDir)
 }

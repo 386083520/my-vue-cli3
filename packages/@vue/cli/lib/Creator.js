@@ -83,8 +83,10 @@ module.exports = class Creator {
         if (false) {
 
         }else {
-            installDeps(context, packageManager, cliOptions.registry)
+            await installDeps(context, packageManager, cliOptions.registry)
         }
+        log(`🚀  Invoking generators...`)
+
     }
     async promptAndResolvePreset (answers = null) {
         if (!answers) {
