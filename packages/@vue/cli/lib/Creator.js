@@ -8,12 +8,14 @@ const getVersions = require('./util/getVersions')
 const writeFileTree = require('./util/writeFileTree')
 const { installDeps } = require('./util/installDeps')
 const PromptModuleAPI = require('./PromptModuleAPI')
+const sortObject = require('./util/sortObject')
 const {
     log,
     hasYarn,
     logWithSpinner,
     stopSpinner,
-    hasPnpm3OrLater
+    hasPnpm3OrLater,
+    loadModule
 } = require('@vue/cli-shared-utils')
 const {
     defaults,
@@ -83,10 +85,23 @@ module.exports = class Creator {
         if (false) {
 
         }else {
-            await installDeps(context, packageManager, cliOptions.registry)
+            // await installDeps(context, packageManager, cliOptions.registry)
         }
         log(`🚀  Invoking generators...`)
-
+        const plugins = this.resolvePlugins(preset.plugins)
+        console.log('gsdplugins', plugins)
+    }
+    resolvePlugins (rawPlugins) {
+        rawPlugins = sortObject(rawPlugins, ['@vue/cli-service'], false)
+        const plugins = []
+        for (const id of Object.keys(rawPlugins)) {
+            const apply = loadModule(`${id}/generator`, this.context) || (() => {})
+            let options = rawPlugins[id] || {}
+            if (options.prompts) {
+            }
+            plugins.push({ id, apply, options })
+        }
+        return plugins
     }
     async promptAndResolvePreset (answers = null) {
         if (!answers) {
