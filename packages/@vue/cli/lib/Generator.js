@@ -1,4 +1,14 @@
 const writeFileTree = require('./util/writeFileTree')
+
+const defaultConfigTransforms = {
+
+}
+const reservedConfigTransforms = {
+
+}
+const ensureEOL = str => {
+    return str
+}
 module.exports = class Generator {
     constructor (context, {
         pkg = {},
@@ -14,6 +24,7 @@ module.exports = class Generator {
         this.completeCbs = completeCbs
         this.invoking = invoking
         this.files = files
+        this.configTransforms = {}
     }
 
     generate ({
@@ -29,7 +40,36 @@ module.exports = class Generator {
     }
 
     extractConfigFiles (extractAll, checkExisting) {
-
+        const configTransforms = Object.assign({},
+            defaultConfigTransforms,
+            this.configTransforms,
+            reservedConfigTransforms
+        )
+        const extract = key => {
+            if(configTransforms[key] &&
+                this.pkg[key] &&
+                !this.originalPkg[key]) {
+                const value = this.pkg[key]
+                const configTransform = configTransforms[key]
+                const res = configTransform.transform(
+                    value,
+                    checkExisting,
+                    this.files,
+                    this.context
+                )
+                const { content, filename } = res
+                this.files[filename] = ensureEOL(content)
+                delete this.pkg[key]
+            }
+        }
+        if (extractAll) {
+            for (const key in this.pkg) {
+                extract(key)
+            }
+        } else {
+            extract('vue')
+            extract('babel')
+        }
     }
 
     resolveFiles () {
