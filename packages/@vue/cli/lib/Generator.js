@@ -1,4 +1,6 @@
 const writeFileTree = require('./util/writeFileTree')
+const inferRootOptions = require('./util/inferRootOptions')
+const GeneratorAPI = require('./GeneratorAPI')
 
 const defaultConfigTransforms = {
 
@@ -25,6 +27,15 @@ module.exports = class Generator {
         this.invoking = invoking
         this.files = files
         this.configTransforms = {}
+
+        const cliService = plugins.find(p => p.id === '@vue/cli-service')
+        const rootOptions = cliService
+            ? cliService.options
+            : inferRootOptions(pkg)
+        plugins.forEach(({ id, apply, options }) => {
+            const api = new GeneratorAPI(id, this, options, rootOptions)
+            apply(api, options, rootOptions, invoking)
+        })
     }
 
     generate ({
