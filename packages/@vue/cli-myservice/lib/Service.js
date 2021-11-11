@@ -2,11 +2,16 @@ const fs = require('fs')
 const path = require('path')
 const readPkg = require('read-pkg')
 const { isPlugin } = require('@vue/cli-shared-utils')
+const debug = require('debug')
+const dotenv = require('dotenv')
+const dotenvExpand = require('dotenv-expand')
 module.exports = class Service {
     constructor (context, { plugins, pkg, inlineOptions, useBuiltIn } = {}) {
         this.context = context
+        this.initialized = false
         this.pkg = this.resolvePkg(pkg)
         this.plugins = this.resolvePlugins(plugins, useBuiltIn)
+        this.pluginsToSkip = new Set()
         this.modes = this.plugins.reduce((modes, { apply: { defaultModes }}) => {
             return Object.assign(modes, defaultModes)
         }, {})
@@ -15,6 +20,53 @@ module.exports = class Service {
     run (name, args = {}, rawArgv = []) {
         console.log('gsdrun', name, args, rawArgv)
         const mode = args.mode || (name === 'build' && args.watch ? 'development' : this.modes[name])
+        this.setPluginsToSkip(args)
+        this.init(mode)
+        args._ = args._ || []
+
+    }
+    init (mode = process.env.VUE_CLI_MODE) {
+        if (this.initialized) {
+            return
+        }
+        this.initialized = true
+        this.mode = mode
+        if (mode) {
+            this.loadEnv(mode)
+        }
+        this.loadEnv()
+    }
+    loadEnv (mode) {
+        const logger = debug('vue:env')
+        const basePath = path.resolve(this.context, `.env${mode ? `.${mode}` : ``}`)
+        const localPath = `${basePath}.local`
+        console.log('gsdlocalPath', localPath)
+        const load = path => {
+            try {
+                const env = dotenv.config({ path, debug: process.env.DEBUG })
+                dotenvExpand(env)
+                logger(path, env)
+            } catch (err) {
+
+            }
+        }
+        load(localPath)
+        load(basePath)
+        const shouldForceDefaultEnv = ''
+        if (mode) {
+            const defaultNodeEnv = 'development'
+            if (shouldForceDefaultEnv || process.env.NODE_ENV == null) {
+                process.env.NODE_ENV = defaultNodeEnv
+            }
+            if (shouldForceDefaultEnv || process.env.BABEL_ENV == null) {
+                process.env.BABEL_ENV = defaultNodeEnv
+            }
+        }
+    }
+    setPluginsToSkip (args) {
+        const skipPlugins = args['skip-plugins']
+        const pluginsToSkip = new Set() // TODO
+        this.pluginsToSkip = pluginsToSkip
     }
     resolvePlugins (inlinePlugins, useBuiltIn) {
         const idToPlugin = id => ({
