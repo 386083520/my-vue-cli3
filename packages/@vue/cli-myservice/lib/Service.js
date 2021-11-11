@@ -1,14 +1,36 @@
 const fs = require('fs')
 const path = require('path')
 const readPkg = require('read-pkg')
-const { isPlugin } = require('@vue/cli-shared-utils')
+const { isPlugin, error, warn } = require('@vue/cli-shared-utils')
 const debug = require('debug')
 const dotenv = require('dotenv')
+const chalk = require('chalk')
 const dotenvExpand = require('dotenv-expand')
+const { validate } = require('./options')
+
+function ensureSlash (config, key) {
+    let val = config[key]
+    if (typeof val === 'string') {
+        if (!/^https?:/.test(val)) {
+            val = val.replace(/^([^/.])/, '/$1')
+        }
+        config[key] = val.replace(/([^/])$/, '$1/')
+        console.log('gsdconfig', config)
+    }
+}
+
+function removeSlash (config, key) {
+    if (typeof config[key] === 'string') {
+        config[key] = config[key].replace(/\/$/g, '')
+    }
+}
+
+
 module.exports = class Service {
     constructor (context, { plugins, pkg, inlineOptions, useBuiltIn } = {}) {
         this.context = context
         this.initialized = false
+        this.inlineOptions = inlineOptions
         this.pkg = this.resolvePkg(pkg)
         this.plugins = this.resolvePlugins(plugins, useBuiltIn)
         this.pluginsToSkip = new Set()
@@ -35,6 +57,73 @@ module.exports = class Service {
             this.loadEnv(mode)
         }
         this.loadEnv()
+        const userOptions = this.loadUserOptions()
+    }
+    loadUserOptions () {
+        let fileConfig, pkgConfig, resolved, resolvedFrom
+        const configPath = path.resolve(this.context, 'vue.config.js')
+        if (fs.existsSync(configPath)) {
+            try {
+                fileConfig = require(configPath)
+            } catch (e) {
+                error(`Error loading ${chalk.bold('vue.config.js')}:`)
+                throw e
+            }
+        }
+        pkgConfig = this.pkg.vue
+        if (pkgConfig && typeof pkgConfig !== 'object') {
+            error(
+                `Error loading vue-cli config in ${chalk.bold(`package.json`)}: ` +
+                `the "vue" field should be an object.`
+            )
+            pkgConfig = null
+        }
+        if (fileConfig) {
+            if (pkgConfig) {
+                warn(
+                    `"vue" field in package.json ignored ` +
+                    `due to presence of ${chalk.bold('vue.config.js')}.`
+                )
+                warn(
+                    `You should migrate it into ${chalk.bold('vue.config.js')} ` +
+                    `and remove it from package.json.`
+                )
+            }
+            resolved = fileConfig
+            resolvedFrom = 'vue.config.js'
+        } else if (pkgConfig) {
+            resolved = pkgConfig
+            resolvedFrom = '"vue" field in package.json'
+        } else {
+            resolved = this.inlineOptions || {}
+            resolvedFrom = 'inline options'
+        }
+        if (typeof resolved.baseUrl !== 'undefined') {
+            if (typeof resolved.publicPath !== 'undefined') {
+                warn(
+                    `You have set both "baseUrl" and "publicPath" in ${chalk.bold('vue.config.js')}, ` +
+                    `in this case, "baseUrl" will be ignored in favor of "publicPath".`
+                )
+            }else {
+                warn(
+                    `"baseUrl" option in ${chalk.bold('vue.config.js')} ` +
+                    `is deprecated now, please use "publicPath" instead.`
+                )
+                resolved.publicPath = resolved.baseUrl
+            }
+        }
+        ensureSlash(resolved, 'publicPath')
+        if (typeof resolved.publicPath === 'string') {
+            resolved.publicPath = resolved.publicPath.replace(/^\.\//, '')
+        }
+        resolved.baseUrl = resolved.publicPath
+        removeSlash(resolved, 'outputDir')
+        validate(resolved, msg => {
+            error(
+                `Invalid options in ${chalk.bold(resolvedFrom)}: ${msg}`
+            )
+        })
+        return resolved
     }
     loadEnv (mode) {
         const logger = debug('vue:env')
