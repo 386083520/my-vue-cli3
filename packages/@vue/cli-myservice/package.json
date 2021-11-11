@@ -12,6 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "minimist": "^1.2.0"
+    "minimist": "^1.2.0",
+    "read-pkg": "^5.0.0",
+    "@vue/cli-shared-utils": "^3.12.1"
   }
 }
