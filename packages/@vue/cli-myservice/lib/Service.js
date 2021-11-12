@@ -6,7 +6,9 @@ const debug = require('debug')
 const dotenv = require('dotenv')
 const chalk = require('chalk')
 const dotenvExpand = require('dotenv-expand')
-const { validate } = require('./options')
+const defaultsDeep = require('lodash.defaultsdeep')
+const { validate, defaults } = require('./options')
+const PluginAPI = require('./PluginAPI')
 
 function ensureSlash (config, key) {
     let val = config[key]
@@ -58,6 +60,18 @@ module.exports = class Service {
         }
         this.loadEnv()
         const userOptions = this.loadUserOptions()
+        this.projectOptions = defaultsDeep(userOptions, defaults())
+        console.log('gsdthis.plugins', this.plugins)
+        this.plugins.forEach(({ id, apply }) => {
+            if (this.pluginsToSkip.has(id)) return
+            apply(new PluginAPI(id, this), this.projectOptions)
+        })
+        if (this.projectOptions.chainWebpack) {
+            // TODO
+        }
+        if (this.projectOptions.configureWebpack) {
+            // TODO
+        }
     }
     loadUserOptions () {
         let fileConfig, pkgConfig, resolved, resolvedFrom
