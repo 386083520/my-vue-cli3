@@ -4,3 +4,5 @@ class PluginAPI {
         this.service = service
     }
 }
+
+module.exports = PluginAPI

@@ -32,6 +32,7 @@ module.exports = class Service {
     constructor (context, { plugins, pkg, inlineOptions, useBuiltIn } = {}) {
         this.context = context
         this.initialized = false
+        this.commands = {}
         this.inlineOptions = inlineOptions
         this.pkg = this.resolvePkg(pkg)
         this.plugins = this.resolvePlugins(plugins, useBuiltIn)
@@ -47,7 +48,19 @@ module.exports = class Service {
         this.setPluginsToSkip(args)
         this.init(mode)
         args._ = args._ || []
-
+        let command = this.commands[name]
+        if (!command && name) {
+            error(`command "${name}" does not exist.`)
+            process.exit(1)
+        }
+        if (!command || args.help || args.h) {
+            command = this.commands.help
+        } else {
+            args._.shift() // remove command itself
+            rawArgv.shift()
+        }
+        const { fn } = command
+        return fn(args, rawArgv)
     }
     init (mode = process.env.VUE_CLI_MODE) {
         if (this.initialized) {
