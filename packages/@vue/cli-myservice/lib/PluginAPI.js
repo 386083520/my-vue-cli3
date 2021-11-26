@@ -3,6 +3,9 @@ class PluginAPI {
         this.id = id
         this.service = service
     }
+    registerCommand (name, opts, fn) {
+        this.service.commands[name] = { fn, opts: opts || {}}
+    }
 }
 
 module.exports = PluginAPI
