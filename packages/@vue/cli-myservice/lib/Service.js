@@ -7,6 +7,8 @@ const dotenv = require('dotenv')
 const chalk = require('chalk')
 const dotenvExpand = require('dotenv-expand')
 const defaultsDeep = require('lodash.defaultsdeep')
+const Config = require('webpack-chain')
+
 const { validate, defaults } = require('./options')
 const PluginAPI = require('./PluginAPI')
 
@@ -34,6 +36,7 @@ module.exports = class Service {
         this.initialized = false
         this.commands = {}
         this.inlineOptions = inlineOptions
+        this.webpackChainFns = []
         this.pkg = this.resolvePkg(pkg)
         this.plugins = this.resolvePlugins(plugins, useBuiltIn)
         this.pluginsToSkip = new Set()
@@ -60,6 +63,7 @@ module.exports = class Service {
             rawArgv.shift()
         }
         const { fn } = command
+        console.log('gsdfn', args, rawArgv)
         return fn(args, rawArgv)
     }
     init (mode = process.env.VUE_CLI_MODE) {
@@ -232,5 +236,15 @@ module.exports = class Service {
         }else {
             return {}
         }
+    }
+    resolveChainableWebpackConfig () {
+        const chainableConfig = new Config()
+        this.webpackChainFns.forEach(fn => fn(chainableConfig))
+        return chainableConfig
+    }
+    resolveWebpackConfig (chainableConfig = this.resolveChainableWebpackConfig()) {
+        let config = chainableConfig.toConfig()
+        // TODO
+        return config
     }
 }
