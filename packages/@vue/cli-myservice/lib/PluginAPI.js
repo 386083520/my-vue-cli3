@@ -9,6 +9,9 @@ class PluginAPI {
     resolveWebpackConfig (chainableConfig) {
         return this.service.resolveWebpackConfig(chainableConfig)
     }
+    chainWebpack (fn) {
+        this.service.webpackChainFns.push(fn)
+    }
 }
 
 module.exports = PluginAPI

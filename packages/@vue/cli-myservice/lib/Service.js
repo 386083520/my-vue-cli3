@@ -239,6 +239,7 @@ module.exports = class Service {
     }
     resolveChainableWebpackConfig () {
         const chainableConfig = new Config()
+        console.log('gsdthis.webpackChainFns', this.webpackChainFns)
         this.webpackChainFns.forEach(fn => fn(chainableConfig))
         return chainableConfig
     }
