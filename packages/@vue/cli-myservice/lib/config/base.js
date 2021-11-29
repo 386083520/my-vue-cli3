@@ -26,15 +26,21 @@ module.exports = (api, options) => {
         }
 
         webpackConfig
-            .mode('development')
-            .context(api.service.context)
+            .mode('development') // 告知 webpack 使用相应模式的内置优化。
+            .context(api.service.context) // 基础目录，绝对路径，用于从配置中解析入口点(entry point)和 加载器(loader)。
             .entry('app')
-            .add('./src/main.js')
+            .add('./src/main.js') // entry: { app: [ './src/main.js' ] } // 开始应用程序打包过程的一个或多个起点
             .end()
-            .output
+            .output // 指示 webpack 如何去输出、以及在哪里输出
             .path(api.resolve(options.outputDir))
-            .filename(isLegacyBundle ? '[name]-legacy.js' : '[name].js')
+            .filename(isLegacyBundle ? '[name]-legacy.js' : '[name].js') // 此选项决定了每个输出 bundle 的名称。这些 bundle 将写入到 output.path 选项指定的目录下
             .publicPath(options.publicPath)
+        // output: {
+        //     path: 'I:\\vue\\lowcode\\demo\\formily-demo2\\dist',
+        //     filename: '[name].js',
+        //     publicPath: '/',
+        //     globalObject: "(typeof self !== 'undefined' ? self : this)"
+        //   }
 
         webpackConfig.resolve
             .extensions
