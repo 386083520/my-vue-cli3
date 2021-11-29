@@ -79,7 +79,7 @@ module.exports = (api, options) => {
         webpackConfig.module
             .rule('vue')
             .test(/\.vue$/)
-            .use('cache-loader')
+            .use('cache-loader') // 在一些性能开销较大的 loader 之前添加 cache-loader，以便将结果缓存到磁盘里
             .loader('cache-loader')
             .options(vueLoaderCacheConfig)
             .end()

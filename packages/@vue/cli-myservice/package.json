@@ -24,6 +24,7 @@
     "webpack": "^4.0.0",
     "vue-loader": "^15.7.0",
     "vue-template-compiler": "^2.6.10",
-    "hash-sum": "^1.0.2"
+    "hash-sum": "^1.0.2",
+    "cache-loader": "^2.0.1"
   }
 }
