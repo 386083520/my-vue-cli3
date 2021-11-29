@@ -92,7 +92,7 @@ module.exports = (api, options) => {
             }, vueLoaderCacheConfig))
 
         webpackConfig
-            .plugin('vue-loader')
+            .plugin('vue-loader') // 一个 webpack 的 loader，它允许你以一种名为单文件组件 (SFCs)的格式撰写 Vue 组件
             .use(require('vue-loader/lib/plugin'))
 
         webpackConfig.module
