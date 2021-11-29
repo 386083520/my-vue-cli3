@@ -1,3 +1,5 @@
+const path = require('path')
+const hash = require('hash-sum')
 class PluginAPI {
     constructor (id, service) {
         this.id = id
@@ -11,6 +13,18 @@ class PluginAPI {
     }
     chainWebpack (fn) {
         this.service.webpackChainFns.push(fn)
+    }
+    resolve (_path) {
+        return path.resolve(this.service.context, _path)
+    }
+
+    genCacheConfig (id, partialIdentifier, configFiles = []) {
+        const cacheDirectory = this.resolve(`node_modules/.cache/${id}`)
+        const variables = {
+
+        }
+        const cacheIdentifier = hash(variables)
+        return { cacheDirectory, cacheIdentifier }
     }
 }
 

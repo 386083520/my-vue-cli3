@@ -15,11 +15,15 @@
     "minimist": "^1.2.0",
     "read-pkg": "^5.0.0",
     "@vue/cli-shared-utils": "^3.12.1",
+    "@vue/component-compiler-utils": "^3.0.0",
     "debug": "^4.1.1",
     "dotenv": "^7.0.0",
     "dotenv-expand": "^5.1.0",
     "lodash.defaultsdeep": "^4.6.1",
     "webpack-chain": "^4.11.0",
-    "webpack": "^4.0.0"
+    "webpack": "^4.0.0",
+    "vue-loader": "^15.7.0",
+    "vue-template-compiler": "^2.6.10",
+    "hash-sum": "^1.0.2"
   }
 }
