@@ -60,14 +60,14 @@ module.exports = (api, options) => {
                     : 'vue/dist/vue.runtime.esm.js'
             )
 
-        webpackConfig.resolveLoader
+        webpackConfig.resolveLoader // 与上面的 resolve 对象的属性集合相同， 但仅用于解析 webpack 的 loader 包
             .modules
             .add('node_modules')
             .add(api.resolve('node_modules'))
             .add(resolveLocal('node_modules'))
 
         webpackConfig.module
-            .noParse(/^(vue|vue-router|vuex|vuex-router-sync)$/)
+            .noParse(/^(vue|vue-router|vuex|vuex-router-sync)$/) // 有些模块我们知道不会依赖第三方模块，所以在打包的时候不需要再进行解析，所以要配置忽略解析，提高我们的打包速度
 
         const vueLoaderCacheConfig = api.genCacheConfig('vue-loader', {
             'vue-loader': require('vue-loader/package.json').version,
