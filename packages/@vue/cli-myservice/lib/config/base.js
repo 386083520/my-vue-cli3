@@ -42,16 +42,16 @@ module.exports = (api, options) => {
         //     globalObject: "(typeof self !== 'undefined' ? self : this)"
         //   }
 
-        webpackConfig.resolve
-            .extensions
+        webpackConfig.resolve // 配置模块如何解析
+            .extensions // 尝试按顺序解析这些后缀名,能够使用户在引入模块时不带扩展
             .merge(['.mjs', '.js', '.jsx', '.vue', '.json', '.wasm'])
             .end()
-            .modules
+            .modules // 告诉 webpack 解析模块时应该搜索的目录
             .add('node_modules')
             .add(api.resolve('node_modules'))
             .add(resolveLocal('node_modules'))
             .end()
-            .alias
+            .alias // 别名，来确保模块引入变得更简单
             .set('@', api.resolve('src'))
             .set(
                 'vue$',
