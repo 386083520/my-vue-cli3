@@ -163,5 +163,17 @@ module.exports = (api, options) => {
             .use(require('webpack/lib/DefinePlugin'), [
                 resolveClientEnv(options)
             ])
+
+        webpackConfig
+            .plugin('case-sensitive-paths') // 保障模块路径和磁盘的实际路径一致
+            .use(require('case-sensitive-paths-webpack-plugin'))
+
+        const { transformer, formatter } = require('../util/resolveLoaderError')
+        webpackConfig
+            .plugin('friendly-errors') // 对各种错误进行分类处理
+            .use(require('@soda/friendly-errors-webpack-plugin'), [{
+                additionalTransformers: [transformer],
+                additionalFormatters: [formatter]
+            }])
     })
 }
