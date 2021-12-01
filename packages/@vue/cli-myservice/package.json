@@ -27,6 +27,10 @@
     "hash-sum": "^1.0.2",
     "cache-loader": "^2.0.1",
     "case-sensitive-paths-webpack-plugin": "^2.2.0",
-    "@soda/friendly-errors-webpack-plugin": "^1.7.1"
+    "@soda/friendly-errors-webpack-plugin": "^1.7.1",
+    "semver": "^6.0.0",
+    "fibers": ">= 3.1.1 <5.0.0",
+    "sass": "^1.19.0",
+    "sass-loader": "^8.0.0"
   }
 }
